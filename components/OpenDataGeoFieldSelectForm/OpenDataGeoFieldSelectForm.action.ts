@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { ErrorId } from "../ErrorMessageToast/ErrorMessageToast.type";
 import type { GeoFieldType } from "@/types/field";
+import { isAddress } from "@/utils/validation/isAddress";
 
 const isString = (value: unknown): value is string =>
   typeof value === "string";
@@ -75,11 +76,12 @@ export const redirectToFetchData = async (
   const latitudeField = formData.get("latitudeField");
 
   if (isString(addressField)) {
-    const isValid =
-      typeof sampleDataForValidation[addressField] ===
-      "string";
+    const sampleAddress =
+      sampleDataForValidation[addressField];
+    const isValidAddress =
+      isString(sampleAddress) && isAddress(sampleAddress);
 
-    if (!isValid) {
+    if (!isValidAddress) {
       return redirectWithErrorId(
         serviceName,
         ErrorId.InvalidAddressField
