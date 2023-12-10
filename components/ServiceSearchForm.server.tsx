@@ -57,12 +57,9 @@ export const ServiceSearchForm = () => {
 
     const rawHTML = await response.text();
 
+    let serviceName: string;
     try {
-      const serviceName = findServiceName(rawHTML);
-
-      return redirect(
-        `/?${new URLSearchParams({ serviceName })}`
-      );
+      serviceName = findServiceName(rawHTML);
     } catch (error) {
       if (
         error &&
@@ -78,12 +75,18 @@ export const ServiceSearchForm = () => {
         );
       }
 
+      console.error(error);
+
       return redirect(
         `/?${new URLSearchParams({
           errorId: "999",
         })}`
       );
     }
+
+    return redirect(
+      `/?${new URLSearchParams({ serviceName })}`
+    );
   };
 
   return (

@@ -3,7 +3,7 @@ import AuthButton from "../components/AuthButton";
 import { OpenDataViewer } from "@/components/OpenDataViewer.server";
 import { OpenDataSampleViewer } from "@/components/OpenDataSampleViewer.server";
 import { ErrorMessageToast } from "@/components/ErrorMessageToast";
-import type { GeoFieldType } from "@/types/field";
+import { GeoFieldType } from "@/types/field";
 
 type AddressSearchParams = {
   fieldType: "address";
@@ -19,11 +19,8 @@ type CoordinateSearchParams = {
 type MainPageSearchParams = {
   serviceName?: string;
   errorId?: string;
-} & (
-  | { fieldType: undefined }
-  | AddressSearchParams
-  | CoordinateSearchParams
-);
+  fieldType?: GeoFieldType;
+} & (AddressSearchParams | CoordinateSearchParams);
 
 export default async function MainPage({
   searchParams,
@@ -41,22 +38,19 @@ export default async function MainPage({
       {searchParams && (
         <>
           {searchParams.serviceName && (
-            <OpenDataSampleViewer
-              serviceName={searchParams.serviceName}
-            />
-          )}
-          {searchParams.fieldType === "address" && (
-            <div>
-              FieldType Address:{" "}
-              {searchParams.addressFieldName}
-            </div>
-          )}
-          {searchParams.fieldType === "coordinate" && (
-            <div>
-              FieldType Coordinate:{" "}
-              {searchParams.latitudeFieldName},{" "}
-              {searchParams.longitudeFieldName}
-            </div>
+            <>
+              <OpenDataSampleViewer
+                serviceName={searchParams.serviceName}
+              />
+              {(searchParams.fieldType === "address" ||
+                searchParams.fieldType ===
+                  "coordinate") && (
+                <OpenDataViewer
+                  serviceName={searchParams.serviceName}
+                  {...searchParams}
+                />
+              )}
+            </>
           )}
           {searchParams.errorId && (
             <ErrorMessageToast
