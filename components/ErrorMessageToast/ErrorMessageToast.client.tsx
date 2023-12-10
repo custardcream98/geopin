@@ -3,20 +3,27 @@
 import { useEffect, useState } from "react";
 import { cx } from "class-variance-authority";
 
-import type { ErrorId } from "./ErrorMessageToast.type";
+import { ErrorId } from "./ErrorMessageToast.type";
 
 const errorMessages: Record<ErrorId, string> = {
-  invalidAddressField: "주소 필드가 올바르지 않습니다.",
-  invalidLatitudeField: "위도 필드가 올바르지 않습니다.",
-  invalidLongitudeField: "경도 필드가 올바르지 않습니다.",
-  invalidCoordinateFields:
+  [ErrorId.InvalidAddressField]:
+    "주소 필드가 올바르지 않습니다.",
+  [ErrorId.InvalidLatitudeField]:
+    "위도 필드가 올바르지 않습니다.",
+  [ErrorId.InvalidLongitudeField]:
+    "경도 필드가 올바르지 않습니다.",
+  [ErrorId.InvalidCoordinateFields]:
     "위도와 경도 필드가 올바르지 않습니다.",
-  sameCoordinateFieldNames:
+  [ErrorId.SameCoordinateFieldNames]:
     "위도와 경도는 서로 다른 필드여야 합니다.",
+  [ErrorId.FailedToFetchOpenDataSeoulSample]:
+    "공공데이터 서울 샘플 데이터를 불러올 수 없습니다.",
+  [ErrorId.FailedToFindOpenDataSeoulServiceName]:
+    "공공데이터 서비스명을 찾을 수 없습니다.",
 };
 
 const isValidErrorId = (
-  errorId: string
+  errorId: number
 ): errorId is ErrorId => errorId in errorMessages;
 
 export const ErrorMessageToast = ({
@@ -35,8 +42,9 @@ export const ErrorMessageToast = ({
     return () => clearTimeout(toastTimerId);
   }, [errorId]);
 
-  const errorMessage = isValidErrorId(errorId)
-    ? errorMessages[errorId]
+  const parsedErrorId = parseInt(errorId, 10);
+  const errorMessage = isValidErrorId(parsedErrorId)
+    ? errorMessages[parsedErrorId]
     : "알 수 없는 오류가 발생했습니다.";
 
   return (

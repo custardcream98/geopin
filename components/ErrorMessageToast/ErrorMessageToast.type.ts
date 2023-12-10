@@ -1,6 +1,9 @@
-export type ErrorId =
-  | "invalidAddressField"
-  | "invalidLongitudeField"
-  | "invalidLatitudeField"
-  | "invalidCoordinateFields"
-  | "sameCoordinateFieldNames";
+export enum ErrorId {
+  InvalidAddressField,
+  InvalidLongitudeField,
+  InvalidLatitudeField,
+  InvalidCoordinateFields,
+  SameCoordinateFieldNames,
+  FailedToFetchOpenDataSeoulSample,
+  FailedToFindOpenDataSeoulServiceName,
+}
