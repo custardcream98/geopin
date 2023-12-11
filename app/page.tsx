@@ -4,6 +4,7 @@ import { OpenDataViewer } from "@/components/OpenDataViewer.server";
 import { OpenDataSampleViewer } from "@/components/OpenDataSampleViewer.server";
 import { ErrorMessageToast } from "@/components/ErrorMessageToast";
 import { GeoFieldType } from "@/types/field";
+import { OpenDataTitleViewer } from "@/components/OpenDataTitleViewer.server";
 
 type AddressSearchParams = {
   fieldType: "address";
@@ -18,6 +19,7 @@ type CoordinateSearchParams = {
 
 type MainPageSearchParams = {
   serviceName?: string;
+  serviceNameKorean?: string;
   errorId?: string;
   fieldType?: GeoFieldType;
 } & (AddressSearchParams | CoordinateSearchParams);
@@ -37,6 +39,11 @@ export default async function MainPage({
       <ServiceSearchForm />
       {searchParams && (
         <>
+          {searchParams.serviceNameKorean && (
+            <OpenDataTitleViewer>
+              {searchParams.serviceNameKorean}
+            </OpenDataTitleViewer>
+          )}
           {searchParams.serviceName && (
             <>
               <OpenDataSampleViewer

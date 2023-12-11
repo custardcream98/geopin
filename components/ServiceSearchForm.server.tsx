@@ -2,6 +2,21 @@ import { redirect } from "next/navigation";
 import { parse } from "node-html-parser";
 import { ErrorId } from "./ErrorMessageToast/ErrorMessageToast.type";
 
+const getSampleDataResponse = async (
+  informationId: string
+) => {
+  const sampleDataUrl = `${
+    process.env.OPEN_DATA_SEOUL_SERVICE_URL
+  }/dataList/openApiView.do?${new URLSearchParams({
+    infId: informationId,
+    srvType: "A",
+  })}`;
+
+  const response = await fetch(sampleDataUrl);
+
+  return response;
+};
+
 const findServiceName = (rawHTML: string) => {
   const parsedSamplePage = parse(rawHTML);
 
@@ -18,13 +33,27 @@ const findServiceName = (rawHTML: string) => {
         return tdElement.textContent;
       }
 
-      if (tdElement.text === "서비스명") {
+      if (tdElement.textContent === "서비스명") {
         serviceNameFlag = true;
       }
     }
   }
 
   throw new Error("No service name found");
+};
+
+const findServiceNameKorean = (rawHTML: string) => {
+  const parsedTargetPage = parse(rawHTML);
+
+  const titleElement = parsedTargetPage.querySelector(
+    "h1.main-content-tit"
+  );
+
+  if (!titleElement) {
+    throw new Error("No service title found");
+  }
+
+  return titleElement.textContent;
 };
 
 export const ServiceSearchForm = () => {
@@ -37,16 +66,13 @@ export const ServiceSearchForm = () => {
     const informationId =
       segments[segments.indexOf("dataList") + 1];
 
-    const sampleDataUrl = `${
-      process.env.OPEN_DATA_SEOUL_SERVICE_URL
-    }/dataList/openApiView.do?${new URLSearchParams({
-      infId: informationId,
-      srvType: "A",
-    })}`;
+    const sampleDataResponse = await getSampleDataResponse(
+      informationId
+    );
 
-    const response = await fetch(sampleDataUrl);
+    const targetPageResponse = await fetch(url);
 
-    if (!response.ok) {
+    if (!sampleDataResponse.ok || !targetPageResponse.ok) {
       return redirect(
         `/?${new URLSearchParams({
           errorId:
@@ -55,11 +81,18 @@ export const ServiceSearchForm = () => {
       );
     }
 
-    const rawHTML = await response.text();
+    const sampleDataRawHTML =
+      await sampleDataResponse.text();
+    const targetPageRawHTML =
+      await targetPageResponse.text();
 
     let serviceName: string;
+    let serviceNameKorean: string;
     try {
-      serviceName = findServiceName(rawHTML);
+      serviceName = findServiceName(sampleDataRawHTML);
+      serviceNameKorean = findServiceNameKorean(
+        targetPageRawHTML
+      );
     } catch (error) {
       if (
         error &&
@@ -85,7 +118,10 @@ export const ServiceSearchForm = () => {
     }
 
     return redirect(
-      `/?${new URLSearchParams({ serviceName })}`
+      `/?${new URLSearchParams({
+        serviceName,
+        serviceNameKorean,
+      })}`
     );
   };
 
