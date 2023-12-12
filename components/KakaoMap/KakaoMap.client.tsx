@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { ResolvedPOIData } from "@/types/data";
 
@@ -9,25 +9,29 @@ import { useKakaoMap } from "./_hooks";
 
 const MARKER_SIZE = 30;
 
+const getOverlayId = (index: number) => `overlay-${index}`;
 const generateOverlayContent = (
+  index: number,
   data: ResolvedPOIData,
   dataKeyPick?: string[]
 ) =>
   !!dataKeyPick?.length &&
   `
-  <div class="flex justify-center items-center mb-9">
-    <ul class="w-[200px] p-2 rounded shadow text-sm bg-white">
-      ${Object.entries(data)
-        .filter(
-          ([key]) =>
-            !dataKeyPick || dataKeyPick.includes(key)
-        )
-        .map(
-          ([key, value]) =>
-            `<li class="w-full">${key}: ${value}</li>`
-        )
-        .join("")}
+  <div class="flex justify-center items-center mb-9 p-2 rounded shadow text-sm bg-white">
+    <ul>
+    ${Object.entries(data)
+      .filter(
+        ([key]) => !dataKeyPick || dataKeyPick.includes(key)
+      )
+      .map(
+        ([key, value]) =>
+          `<li class="w-full">${key}: ${value}</li>`
+      )
+      .join("")}
     </ul>
+    <button id="${getOverlayId(
+      index
+    )}" type="button" class="float-right font-bold">닫기</button>
   </div>
 `;
 
@@ -41,7 +45,10 @@ export const KakaoMap = ({
   const mapContainerElementRef =
     useRef<HTMLDivElement>(null);
   const markersRef = useRef<any[]>([]);
-  const overlaysRef = useRef<any[]>([]);
+  // const overlaysRef = useRef<any[]>([]);
+  const [overlaysState, setOverlaysState] = useState<any[]>(
+    []
+  );
   const kakaoMap = useKakaoMap(mapContainerElementRef);
 
   useEffect(() => {
@@ -64,33 +71,46 @@ export const KakaoMap = ({
     markersRef.current.forEach((marker) =>
       marker.setMap(null)
     );
-    const markers = positions.map(
-      (position) =>
-        new kakaoMaps.Marker({
-          map: kakaoMap,
-          position,
-          image: markerImage,
-        })
-    );
-    markersRef.current = markers;
-
-    overlaysRef.current.forEach((overlay) =>
+    overlaysState.forEach((overlay) =>
       overlay.setMap(null)
     );
-    const overlays = positions.map(
-      (position, index) =>
-        new kakaoMaps.CustomOverlay({
-          map: kakaoMap,
-          position,
-          content: generateOverlayContent(
-            data[index],
-            dataKeyPick
-          ),
-          yAnchor: 1,
-          zIndex: 1,
-        })
-    );
-    overlaysRef.current = overlays;
+
+    const markers: any[] = [];
+    const overlays: any[] = [];
+
+    positions.forEach((position, index) => {
+      const newMarker = new kakaoMaps.Marker({
+        map: kakaoMap,
+        position,
+        image: markerImage,
+        clickable: true,
+      });
+      const newOverlay = new kakaoMaps.CustomOverlay({
+        map: kakaoMap,
+        position,
+        content: generateOverlayContent(
+          index,
+          data[index],
+          dataKeyPick
+        ),
+        yAnchor: 1,
+        zIndex: 1,
+      });
+
+      kakaoMaps.event.addListener(
+        newMarker,
+        "click",
+        () => {
+          newOverlay.setMap(kakaoMap);
+        }
+      );
+
+      markers.push(newMarker);
+      overlays.push(newOverlay);
+    });
+
+    markersRef.current = markers;
+    setOverlaysState(overlays);
 
     if (positions.length > 0) {
       const bounds = positions.reduce(
@@ -101,6 +121,22 @@ export const KakaoMap = ({
       kakaoMap.setBounds(bounds);
     }
   }, [kakaoMap, data, dataKeyPick]);
+  /**
+   * overlaysState는 오버레이 렌더링 후 '닫기' 이벤트 리스너를 추가하기 위해
+   * state와 effect로 관리합니다.
+   *
+   * 따라서 위의 deps array에서는 의도적으로 제외합니다.
+   * */
+
+  useEffect(() => {
+    overlaysState.map((overlay, index) => {
+      document
+        .getElementById(getOverlayId(index))
+        ?.addEventListener("click", () =>
+          overlay.setMap(null)
+        );
+    });
+  }, [overlaysState]);
 
   return (
     <div
