@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="bg-background text-foreground">
-        <main className="min-h-screen flex flex-col items-center">
+        <main className="min-h-screen flex flex-col items-center w-full px-4 lg:w-[1024px] lg:p-0 lg:mx-auto">
           {children}
         </main>
       </body>

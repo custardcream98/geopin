@@ -105,7 +105,7 @@ export const KakaoMap = ({
   return (
     <div
       ref={mapContainerElementRef}
-      className="w-full flex-1 min-h-[50vh]"
+      className="w-full h-full"
     >
       {!kakaoMap && (
         <div className="w-full h-full flex justify-center items-center">

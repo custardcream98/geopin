@@ -133,7 +133,10 @@ export const OpenDataViewer = async ({
     <div>
       {!!dataWithCoordinate.length && (
         <>
-          <form action={pickDataKey}>
+          <form
+            className="overflow-x-scroll"
+            action={pickDataKey}
+          >
             {Object.entries(dataWithCoordinate[0])
               .filter(([key]) => key !== "coordinate")
               .map(([key, sampleValue]) => (
@@ -152,10 +155,13 @@ export const OpenDataViewer = async ({
               ))}
             <button type="submit">선택</button>
           </form>
-          <KakaoMap
-            data={dataWithCoordinate}
-            dataKeyPick={searchParams.dataKeyPick}
-          />
+          <div>데이터 수: {dataWithCoordinate.length}</div>
+          <div className="w-full h-[80vh]">
+            <KakaoMap
+              data={dataWithCoordinate}
+              dataKeyPick={searchParams.dataKeyPick}
+            />
+          </div>
         </>
       )}
     </div>
