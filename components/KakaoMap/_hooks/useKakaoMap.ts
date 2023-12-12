@@ -36,9 +36,16 @@ export const useKakaoMap = (
       KAKAO_MAP_SCRIPT_ID
     );
     if (kakaoMapScriptElement) {
-      kakaoMapScriptElement.onload = () => {
-        kakao.maps.load(() => initializeKakaoMap());
-      };
+      if (typeof kakao === "undefined") {
+        kakaoMapScriptElement.onload = () => {
+          (kakao as any).maps.load(() =>
+            initializeKakaoMap()
+          );
+        };
+      } else {
+        initializeKakaoMap();
+      }
+
       return;
     }
 
