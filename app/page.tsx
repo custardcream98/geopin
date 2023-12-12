@@ -5,6 +5,7 @@ import { OpenDataSampleViewer } from "@/components/OpenDataSampleViewer.server";
 import { ErrorMessageToast } from "@/components/ErrorMessageToast";
 import { GeoFieldType } from "@/types/field";
 import { OpenDataTitleViewer } from "@/components/OpenDataTitleViewer.server";
+import { getAuth } from "@/utils/supabase/server";
 
 type AddressSearchParams = {
   fieldType: "address";
@@ -38,6 +39,9 @@ export default async function MainPage({
 }: {
   searchParams?: MainPageSearchParams;
 }) {
+  const auth = await getAuth();
+  const isLogged = auth?.user !== null;
+
   return (
     <div className="flex-1 w-full flex flex-col gap-20 items-center">
       <nav className="w-full flex justify-center border-b h-16">
@@ -45,8 +49,12 @@ export default async function MainPage({
           <AuthButton />
         </div>
       </nav>
-      <ServiceSearchForm />
-      {searchParams && (
+      {isLogged ? (
+        <ServiceSearchForm />
+      ) : (
+        <div>로그인이 필요합니다.</div>
+      )}
+      {isLogged && searchParams && (
         <>
           {searchParams.serviceNameKorean && (
             <OpenDataTitleViewer>
