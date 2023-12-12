@@ -1,6 +1,4 @@
-import { useMemo } from "react";
-
-import { KakaoMap } from "./KakaoMap.client";
+import { KakaoMap } from "./KakaoMap";
 
 import { getOpenDataSeoul } from "@/utils/openData/seoul/seoul.server";
 import { getGeocode } from "@/utils/vworld/geocode.server";
