@@ -13,15 +13,41 @@ export const KakaoMap = ({
 }: {
   data: ResolvedPOIData[];
 }) => {
-  const mapContainerElement = useRef<HTMLDivElement>(null);
+  const mapContainerElementRef =
+    useRef<HTMLDivElement>(null);
   const [kakaoMap, setKakaoMap] = useState<any>(null);
   const markersRef = useRef<any[]>([]);
 
   useEffect(() => {
-    if (
-      window === undefined ||
-      document.getElementById(KAKAO_MAP_SCRIPT_ID)
-    ) {
+    const mapContainerElement =
+      mapContainerElementRef.current;
+    if (window === undefined || !mapContainerElement) {
+      return;
+    }
+
+    const initializeKakaoMap = () => {
+      const center = new kakao.maps.LatLng(
+        37.50802,
+        127.062835
+      );
+      const options = {
+        center,
+        level: 3,
+      };
+      const map = new kakao.maps.Map(
+        mapContainerElementRef.current,
+        options
+      );
+      setKakaoMap(map);
+    };
+
+    const kakaoMapScriptElement = document.getElementById(
+      KAKAO_MAP_SCRIPT_ID
+    );
+    if (kakaoMapScriptElement) {
+      kakaoMapScriptElement.onload = () => {
+        kakao.maps.load(() => initializeKakaoMap());
+      };
       return;
     }
 
@@ -31,26 +57,12 @@ export const KakaoMap = ({
     document.head.appendChild(script);
 
     script.onload = () => {
-      kakao.maps.load(() => {
-        const center = new kakao.maps.LatLng(
-          37.50802,
-          127.062835
-        );
-        const options = {
-          center,
-          level: 3,
-        };
-        const map = new kakao.maps.Map(
-          mapContainerElement.current,
-          options
-        );
-        setKakaoMap(map);
-      });
+      kakao.maps.load(() => initializeKakaoMap());
     };
   }, []);
 
   useEffect(() => {
-    if (kakaoMap === null) {
+    if (!kakaoMap) {
       return;
     }
 
@@ -80,7 +92,7 @@ export const KakaoMap = ({
 
   return (
     <div
-      ref={mapContainerElement}
+      ref={mapContainerElementRef}
       className="w-full flex-1"
     >
       {!kakaoMap && (
