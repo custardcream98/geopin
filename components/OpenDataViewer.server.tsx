@@ -1,11 +1,14 @@
+import { redirect } from "next/navigation";
+
 import { KakaoMap } from "./KakaoMap";
 
 import { getOpenDataSeoul } from "@/utils/openData/seoul/seoul.server";
 import { getGeocode } from "@/utils/vworld/geocode.server";
 import { isResolvedPOIData } from "@/utils/validation/isResolvedPOIData";
 
-import type { GeoFieldType } from "@/types/field";
 import type { POIData } from "@/types/data";
+import type { MainPageSearchParams } from "@/app/page";
+import { omit } from "@/utils/object";
 
 const getResolvedData = async ({
   serviceName,
@@ -78,37 +81,83 @@ const parseCoordinate = async (
 };
 
 export const OpenDataViewer = async ({
-  serviceName,
-  ...props
+  searchParams,
 }: {
-  serviceName: string;
-  fieldType?: GeoFieldType;
-} & (
-  | {
-      fieldType: "address";
-      addressFieldName: string;
-    }
-  | {
-      fieldType: "coordinate";
-      latitudeFieldName: string;
-      longitudeFieldName: string;
-    }
-)) => {
+  searchParams: MainPageSearchParams &
+    Required<Pick<MainPageSearchParams, "serviceName">>;
+}) => {
   const coordinateResolver =
-    props.fieldType === "address"
-      ? geocodeAddress.bind(null, props.addressFieldName)
+    searchParams.fieldType === "address"
+      ? geocodeAddress.bind(
+          null,
+          searchParams.addressFieldName
+        )
       : parseCoordinate.bind(
           null,
-          props.latitudeFieldName,
-          props.longitudeFieldName
+          searchParams.latitudeFieldName,
+          searchParams.longitudeFieldName
         );
 
   const data = await getResolvedData({
-    serviceName,
+    serviceName: searchParams.serviceName,
     coordinateResolver,
   });
 
   const dataWithCoordinate = data.filter(isResolvedPOIData);
 
-  return <KakaoMap data={dataWithCoordinate} />;
+  const pickDataKey = async (formData: FormData) => {
+    "use server";
+
+    const dataKeyPick = formData.getAll("data-key-pick");
+
+    if (!dataKeyPick.length) {
+      return null;
+    }
+
+    const paramString = new URLSearchParams(
+      omit(searchParams, ["dataKeyPick"] as const)
+    );
+
+    dataKeyPick.forEach((dataKey) => {
+      if (typeof dataKey !== "string") {
+        return;
+      }
+
+      paramString.append("dataKeyPick", dataKey);
+    });
+
+    return redirect(`/?${paramString}`);
+  };
+
+  return (
+    <div>
+      {!!dataWithCoordinate.length && (
+        <>
+          <form action={pickDataKey}>
+            {Object.entries(dataWithCoordinate[0])
+              .filter(([key]) => key !== "coordinate")
+              .map(([key, sampleValue]) => (
+                <label key={key} className="block">
+                  <input
+                    type="checkbox"
+                    name="data-key-pick"
+                    value={key}
+                    defaultChecked={searchParams.dataKeyPick?.includes(
+                      key
+                    )}
+                  />
+                  {key} ({typeof sampleValue}), 샘플 데이터:{" "}
+                  {JSON.stringify(sampleValue)}
+                </label>
+              ))}
+            <button type="submit">선택</button>
+          </form>
+          <KakaoMap
+            data={dataWithCoordinate}
+            dataKeyPick={searchParams.dataKeyPick}
+          />
+        </>
+      )}
+    </div>
+  );
 };

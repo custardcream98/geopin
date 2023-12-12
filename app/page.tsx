@@ -17,11 +17,12 @@ type CoordinateSearchParams = {
   longitudeFieldName: string;
 };
 
-type MainPageSearchParams = {
+export type MainPageSearchParams = {
   serviceName?: string;
   serviceNameKorean?: string;
   errorId?: string;
   fieldType?: GeoFieldType;
+  dataKeyPick?: string[];
 } & (AddressSearchParams | CoordinateSearchParams);
 
 export default async function MainPage({
@@ -53,8 +54,10 @@ export default async function MainPage({
                 searchParams.fieldType ===
                   "coordinate") && (
                 <OpenDataViewer
-                  serviceName={searchParams.serviceName}
-                  {...searchParams}
+                  searchParams={{
+                    ...searchParams,
+                    serviceName: searchParams.serviceName,
+                  }}
                 />
               )}
             </>

@@ -9,14 +9,39 @@ import { useKakaoMap } from "./_hooks";
 
 const MARKER_SIZE = 30;
 
+const generateOverlayContent = (
+  data: ResolvedPOIData,
+  dataKeyPick?: string[]
+) =>
+  !!dataKeyPick?.length &&
+  `
+  <div class="flex justify-center items-center mb-9">
+    <ul class="w-[200px] p-2 rounded shadow text-sm bg-white">
+      ${Object.entries(data)
+        .filter(
+          ([key]) =>
+            !dataKeyPick || dataKeyPick.includes(key)
+        )
+        .map(
+          ([key, value]) =>
+            `<li class="w-full">${key}: ${value}</li>`
+        )
+        .join("")}
+    </ul>
+  </div>
+`;
+
 export const KakaoMap = ({
   data,
+  dataKeyPick,
 }: {
   data: ResolvedPOIData[];
+  dataKeyPick?: string[];
 }) => {
   const mapContainerElementRef =
     useRef<HTMLDivElement>(null);
   const markersRef = useRef<any[]>([]);
+  const overlaysRef = useRef<any[]>([]);
   const kakaoMap = useKakaoMap(mapContainerElementRef);
 
   useEffect(() => {
@@ -49,6 +74,24 @@ export const KakaoMap = ({
     );
     markersRef.current = markers;
 
+    overlaysRef.current.forEach((overlay) =>
+      overlay.setMap(null)
+    );
+    const overlays = positions.map(
+      (position, index) =>
+        new kakaoMaps.CustomOverlay({
+          map: kakaoMap,
+          position,
+          content: generateOverlayContent(
+            data[index],
+            dataKeyPick
+          ),
+          yAnchor: 1,
+          zIndex: 1,
+        })
+    );
+    overlaysRef.current = overlays;
+
     if (positions.length > 0) {
       const bounds = positions.reduce(
         (bounds, coordinate) => bounds.extend(coordinate),
@@ -57,12 +100,12 @@ export const KakaoMap = ({
 
       kakaoMap.setBounds(bounds);
     }
-  }, [kakaoMap, data]);
+  }, [kakaoMap, data, dataKeyPick]);
 
   return (
     <div
       ref={mapContainerElementRef}
-      className="w-full flex-1"
+      className="w-full flex-1 min-h-[50vh]"
     >
       {!kakaoMap && (
         <div className="w-full h-full flex justify-center items-center">
