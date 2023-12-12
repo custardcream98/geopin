@@ -10,18 +10,22 @@
     "@supabase/supabase-js": "latest",
     "autoprefixer": "10.4.15",
     "class-variance-authority": "^0.7.0",
+    "epsg-index": "^2.0.0",
     "geist": "^1.0.0",
     "next": "14.0.4",
     "node-html-parser": "^6.1.11",
     "postcss": "8.4.29",
+    "proj4": "^2.9.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwindcss": "3.3.3"
   },
   "devDependencies": {
     "@types/node": "20.3.1",
+    "@types/proj4": "^2.5.5",
     "@types/react": "18.2.8",
     "@types/react-dom": "18.2.5",
+    "@types/transform-coordinates": "^1.0.2",
     "encoding": "^0.1.13",
     "typescript": "5.1.3"
   }
