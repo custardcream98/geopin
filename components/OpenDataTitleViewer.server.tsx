@@ -1,5 +1,5 @@
 export const OpenDataTitleViewer = async ({
   children,
 }: React.PropsWithChildren) => {
-  return <h2>{children}</h2>;
+  return <strong className="text-lg">{children}</strong>;
 };

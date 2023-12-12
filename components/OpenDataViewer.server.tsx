@@ -204,40 +204,54 @@ export const OpenDataViewer = async ({
   };
 
   return (
-    <div>
+    <div className="w-full">
       {!!dataWithCoordinate.length && (
         <>
-          <form
-            className="overflow-x-scroll"
-            action={pickDataKey}
-          >
-            {Object.entries(dataWithCoordinate[0])
-              .filter(([key]) => key !== "coordinate")
-              .map(([key, sampleValue]) => {
-                const originalKey =
-                  fieldNameMapReverse[key] ?? key;
+          <details>
+            <summary>데이터 필드 선택하기</summary>
+            <form
+              className="overflow-x-scroll"
+              action={pickDataKey}
+            >
+              {Object.keys(dataWithCoordinate[0])
+                .filter((key) => key !== "coordinate")
+                .map((key) => {
+                  const originalKey =
+                    fieldNameMapReverse[key] ?? key;
 
-                return (
-                  <label
-                    key={originalKey}
-                    className="block"
-                  >
-                    <input
-                      type="checkbox"
-                      name="data-key-pick"
-                      value={originalKey}
-                      defaultChecked={searchParams.dataKeyPick?.includes(
-                        originalKey
-                      )}
-                    />
-                    {key} ({typeof sampleValue}), 샘플
-                    데이터: {JSON.stringify(sampleValue)}
-                  </label>
-                );
-              })}
-            <button type="submit">선택</button>
-          </form>
-          <div>데이터 수: {dataWithCoordinate.length}</div>
+                  return (
+                    <label
+                      key={originalKey}
+                      className="block"
+                    >
+                      <input
+                        className="mr-2"
+                        type="checkbox"
+                        name="data-key-pick"
+                        value={originalKey}
+                        defaultChecked={searchParams.dataKeyPick?.includes(
+                          originalKey
+                        )}
+                      />
+                      {key}
+                    </label>
+                  );
+                })}
+              <button
+                type="submit"
+                className="mx-2 p-2 shadow rounded block w-full my-2"
+              >
+                선택
+              </button>
+            </form>
+          </details>
+          <div className="my-2">
+            데이터 수: {dataWithCoordinate.length}
+          </div>
+          <div className="my-2">
+            마커를 누르면 선택한 데이터 필드 정보가
+            표시됩니다.
+          </div>
           <div className="w-full h-[80vh]">
             <KakaoMap
               data={dataWithCoordinate}

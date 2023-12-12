@@ -183,19 +183,30 @@ export const ServiceSearchForm = () => {
   };
 
   return (
-    <div>
-      <form action={getSeoulOpenData}>
-        <label htmlFor="target-url">공공데이터 URL</label>
+    <div className="w-full">
+      <form action={getSeoulOpenData} className="w-full">
+        <label
+          htmlFor="target-url"
+          className="block text-center"
+        >
+          서울시 공공데이터 URL을 입력해주세요.
+        </label>
         <input
           type="text"
           id="target-url"
           name="target-url"
           required
-          pattern="(?:http[s]{0,1}\:\/\/)data\.seoul\.go\.kr\/dataList\/[0-9A-Za-z\/]{4,}"
-          className="invalid:bg-red-200 bg-green-200"
+          // pattern="(?:http[s]{0,1}\:\/\/)data\.seoul\.go\.kr\/dataList\/[0-9A-Za-z\/]{4,}"
+          // className="invalid:bg-red-200 bg-green-200"
           autoSave="off"
+          className="mx-2 p-2 border rounded block w-full mt-2"
         />
-        <button type="submit">불러오기</button>
+        <button
+          type="submit"
+          className="mx-2 p-2 shadow rounded block w-full mt-2"
+        >
+          불러오기
+        </button>
       </form>
     </div>
   );

@@ -15,7 +15,7 @@ export const OpenDataSampleViewer = async ({
   const sampleRow = data.row[0];
 
   return (
-    <div className="w-10/12 mx-auto">
+    <div className="w-full">
       <details className="mb-4">
         <summary>Sample 응답값 확인하기</summary>
         <pre className="overflow-auto">

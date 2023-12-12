@@ -40,7 +40,7 @@ export const OpenDataGeoFieldSelectForm = ({
     redirectToFetchData.bind(null, data, searchParams);
 
   return (
-    <div>
+    <div className="w-full">
       <fieldset className="mb-2">
         <legend className="mb-1">
           주소 / 좌표중 어떤 필드를 선택할지 결정해주세요.
