@@ -1,9 +1,11 @@
+import { decode, encode } from "@/utils/crypto";
+
 export const parseFieldNameMap = (
   fieldNameMapString?: string
 ): Record<string, string> => {
-  const decodedFieldNameMapString = decodeURIComponent(
-    fieldNameMapString ?? "{}"
-  );
+  const decodedFieldNameMapString = fieldNameMapString
+    ? decode(fieldNameMapString)
+    : "{}";
 
   return JSON.parse(
     !!decodedFieldNameMapString &&
@@ -11,4 +13,10 @@ export const parseFieldNameMap = (
       ? decodedFieldNameMapString
       : "{}"
   );
+};
+
+export const stringifyFieldNameMap = (
+  fieldNameMap?: Record<string, string>
+): string => {
+  return encode(JSON.stringify(fieldNameMap));
 };

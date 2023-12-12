@@ -115,7 +115,9 @@ export const OpenDataGeoFieldSelectForm = ({
               </>
             )}
           </div>
-          <button>데이터 불러오기</button>
+          <button className="mx-2 p-2 shadow rounded block w-full mt-2">
+            데이터 불러오기
+          </button>
         </form>
       )}
     </div>

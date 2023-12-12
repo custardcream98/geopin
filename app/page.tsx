@@ -6,6 +6,7 @@ import { ErrorMessageToast } from "@/components/ErrorMessageToast";
 import { GeoFieldType } from "@/types/field";
 import { OpenDataTitleViewer } from "@/components/OpenDataTitleViewer.server";
 import Link from "next/link";
+import { decode } from "@/utils/crypto";
 // import { getAuth } from "@/utils/supabase/server";
 
 type AddressSearchParams = {
@@ -63,7 +64,7 @@ export default async function MainPage({
           <>
             {searchParams.serviceNameKorean && (
               <OpenDataTitleViewer>
-                {searchParams.serviceNameKorean}
+                {decode(searchParams.serviceNameKorean)}
               </OpenDataTitleViewer>
             )}
             {searchParams.serviceName &&

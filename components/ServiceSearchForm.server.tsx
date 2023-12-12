@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { parse } from "node-html-parser";
+
 import { ErrorId } from "./ErrorMessageToast/ErrorMessageToast.type";
+import { stringifyFieldNameMap } from "./_utils/fieldNameMap";
+import { encode } from "@/utils/crypto";
 
 const getSampleDataResponse = async (
   informationId: string
@@ -53,7 +56,7 @@ const findServiceNameKorean = (rawHTML: string) => {
     throw new Error("No service title found");
   }
 
-  return titleElement.textContent;
+  return encode(titleElement.textContent.trim());
 };
 
 const findFieldNameMap = (rawHTML: string) => {
@@ -144,8 +147,8 @@ export const ServiceSearchForm = () => {
       serviceNameKorean = findServiceNameKorean(
         targetPageRawHTML
       );
-      fieldNameMapString = encodeURIComponent(
-        JSON.stringify(findFieldNameMap(sampleDataRawHTML))
+      fieldNameMapString = stringifyFieldNameMap(
+        findFieldNameMap(sampleDataRawHTML)
       );
       epsg = findEPSG(targetPageRawHTML) ?? "EPSG:4326";
     } catch (error) {
