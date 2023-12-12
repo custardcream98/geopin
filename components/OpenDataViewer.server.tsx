@@ -10,22 +10,27 @@ import type { POIData } from "@/types/data";
 import type { MainPageSearchParams } from "@/app/page";
 import { omit } from "@/utils/object";
 
+type MainPageSearchParamsWithServiceName =
+  MainPageSearchParams &
+    Required<Pick<MainPageSearchParams, "serviceName">>;
+
 const getResolvedData = async ({
-  serviceName,
   coordinateResolver,
   searchParams,
 }: {
-  serviceName: string;
   coordinateResolver: (
     data: Record<string, unknown>
   ) => Promise<{
     latitude: number;
     longitude: number;
   } | null>;
-  searchParams: MainPageSearchParams;
+  searchParams: MainPageSearchParamsWithServiceName;
 }): Promise<POIData[]> => {
-  const data = (await getOpenDataSeoul({ serviceName }))
-    .row;
+  const data = (
+    await getOpenDataSeoul({
+      serviceName: searchParams.serviceName,
+    })
+  ).row;
 
   const filterDuplicateData = (
     data: Record<string, unknown>[]
@@ -119,8 +124,7 @@ const parseCoordinate = async (
 export const OpenDataViewer = async ({
   searchParams,
 }: {
-  searchParams: MainPageSearchParams &
-    Required<Pick<MainPageSearchParams, "serviceName">>;
+  searchParams: MainPageSearchParamsWithServiceName;
 }) => {
   const coordinateResolver =
     searchParams.fieldType === "address"
@@ -135,7 +139,6 @@ export const OpenDataViewer = async ({
         );
 
   const data = await getResolvedData({
-    serviceName: searchParams.serviceName,
     coordinateResolver,
     searchParams,
   });
