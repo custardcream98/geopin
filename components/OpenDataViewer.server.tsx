@@ -13,6 +13,7 @@ import { omit } from "@/utils/object";
 const getResolvedData = async ({
   serviceName,
   coordinateResolver,
+  searchParams,
 }: {
   serviceName: string;
   coordinateResolver: (
@@ -21,12 +22,47 @@ const getResolvedData = async ({
     latitude: number;
     longitude: number;
   } | null>;
+  searchParams: MainPageSearchParams;
 }): Promise<POIData[]> => {
   const data = (await getOpenDataSeoul({ serviceName }))
     .row;
 
+  const filterDuplicateData = (
+    data: Record<string, unknown>[]
+  ) => {
+    if (searchParams.fieldType === "address") {
+      const addressFieldName =
+        searchParams.addressFieldName;
+
+      return data.filter(
+        (row, index, array) =>
+          array.findIndex(
+            (row2) =>
+              row[addressFieldName] ===
+              row2[addressFieldName]
+          ) === index
+      );
+    }
+
+    const latitudeFieldName =
+      searchParams.latitudeFieldName;
+    const longitudeFieldName =
+      searchParams.longitudeFieldName;
+
+    return data.filter(
+      (row, index, array) =>
+        array.findIndex(
+          (row2) =>
+            row[latitudeFieldName] ===
+              row2[latitudeFieldName] &&
+            row[longitudeFieldName] ===
+              row2[longitudeFieldName]
+        ) === index
+    );
+  };
+
   return Promise.all(
-    data.map(async (row) => {
+    filterDuplicateData(data).map(async (row) => {
       try {
         const coordinate = await coordinateResolver(row);
         return {
@@ -101,6 +137,7 @@ export const OpenDataViewer = async ({
   const data = await getResolvedData({
     serviceName: searchParams.serviceName,
     coordinateResolver,
+    searchParams,
   });
 
   const dataWithCoordinate = data.filter(isResolvedPOIData);
