@@ -5,14 +5,12 @@ import { KakaoMap } from "./KakaoMap";
 import { getOpenDataSeoul } from "@/utils/openData/seoul/seoul.server";
 import { getGeocode } from "@/utils/vworld/geocode.server";
 import { isResolvedPOIData } from "@/utils/validation/isResolvedPOIData";
-
-import type { POIData } from "@/types/data";
-import type { MainPageSearchParams } from "@/app/page";
 import { omit } from "@/utils/object";
 
-type MainPageSearchParamsWithServiceName =
-  MainPageSearchParams &
-    Required<Pick<MainPageSearchParams, "serviceName">>;
+import type { POIData } from "@/types/data";
+import type { MainPageSearchParamsWithServiceName } from "@/app/page";
+import { parseFieldNameMap } from "./_utils/fieldNameMap";
+import { transform } from "@/utils/epsg/transform";
 
 const getResolvedData = async ({
   coordinateResolver,
@@ -106,6 +104,7 @@ const geocodeAddress = async (
 const parseCoordinate = async (
   latitudeFieldName: string,
   longitudeFieldName: string,
+  epsg: string,
   data: Record<string, unknown>
 ) => {
   const latitude = Number(data[latitudeFieldName]);
@@ -115,9 +114,19 @@ const parseCoordinate = async (
     return null;
   }
 
+  if (epsg === "EPSG:4326") {
+    return {
+      latitude,
+      longitude,
+    };
+  }
+
+  const transformer = transform(epsg, "4326");
+  const [transformedLongitude, transformedLatitude] =
+    transformer.forward([latitude, longitude]);
   return {
-    latitude,
-    longitude,
+    latitude: transformedLatitude,
+    longitude: transformedLongitude,
   };
 };
 
@@ -135,7 +144,8 @@ export const OpenDataViewer = async ({
       : parseCoordinate.bind(
           null,
           searchParams.latitudeFieldName,
-          searchParams.longitudeFieldName
+          searchParams.longitudeFieldName,
+          decodeURIComponent(searchParams.epsg)
         );
 
   const data = await getResolvedData({
@@ -143,7 +153,31 @@ export const OpenDataViewer = async ({
     searchParams,
   });
 
-  const dataWithCoordinate = data.filter(isResolvedPOIData);
+  const fieldNameMap: Record<string, string> =
+    parseFieldNameMap(searchParams.fieldNameMapString);
+
+  const fieldNameMapReverse = Object.fromEntries(
+    Object.entries(fieldNameMap).map(([key, value]) => [
+      value,
+      key,
+    ])
+  );
+
+  const dataWithKoreanFieldName = data.map((row) => {
+    const newRow: POIData = {
+      coordinate: row.coordinate,
+    };
+
+    Object.entries(row).forEach(([key, value]) => {
+      newRow[fieldNameMap[key] ?? key] = value;
+    });
+
+    return newRow;
+  });
+
+  const dataWithCoordinate = dataWithKoreanFieldName.filter(
+    isResolvedPOIData
+  );
 
   const pickDataKey = async (formData: FormData) => {
     "use server";
@@ -179,27 +213,37 @@ export const OpenDataViewer = async ({
           >
             {Object.entries(dataWithCoordinate[0])
               .filter(([key]) => key !== "coordinate")
-              .map(([key, sampleValue]) => (
-                <label key={key} className="block">
-                  <input
-                    type="checkbox"
-                    name="data-key-pick"
-                    value={key}
-                    defaultChecked={searchParams.dataKeyPick?.includes(
-                      key
-                    )}
-                  />
-                  {key} ({typeof sampleValue}), 샘플 데이터:{" "}
-                  {JSON.stringify(sampleValue)}
-                </label>
-              ))}
+              .map(([key, sampleValue]) => {
+                const originalKey =
+                  fieldNameMapReverse[key] ?? key;
+
+                return (
+                  <label
+                    key={originalKey}
+                    className="block"
+                  >
+                    <input
+                      type="checkbox"
+                      name="data-key-pick"
+                      value={originalKey}
+                      defaultChecked={searchParams.dataKeyPick?.includes(
+                        originalKey
+                      )}
+                    />
+                    {key} ({typeof sampleValue}), 샘플
+                    데이터: {JSON.stringify(sampleValue)}
+                  </label>
+                );
+              })}
             <button type="submit">선택</button>
           </form>
           <div>데이터 수: {dataWithCoordinate.length}</div>
           <div className="w-full h-[80vh]">
             <KakaoMap
               data={dataWithCoordinate}
-              dataKeyPick={searchParams.dataKeyPick}
+              dataKeyPick={searchParams.dataKeyPick?.map(
+                (key) => fieldNameMap[key] ?? key
+              )}
             />
           </div>
         </>

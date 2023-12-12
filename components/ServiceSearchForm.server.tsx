@@ -33,7 +33,7 @@ const findServiceName = (rawHTML: string) => {
         return tdElement.textContent;
       }
 
-      if (tdElement.textContent === "서비스명") {
+      if (tdElement.textContent.trim() === "서비스명") {
         serviceNameFlag = true;
       }
     }
@@ -54,6 +54,55 @@ const findServiceNameKorean = (rawHTML: string) => {
   }
 
   return titleElement.textContent;
+};
+
+const findFieldNameMap = (rawHTML: string) => {
+  const parsedTargetPage = parse(rawHTML);
+
+  const outputTableTitle = parsedTargetPage
+    .querySelectorAll("caption")
+    .find(
+      (element) => element.textContent.trim() === "출력값"
+    );
+  if (!outputTableTitle) {
+    return;
+  }
+
+  const tableElement = outputTableTitle.parentNode;
+  let fieldNameMap: Record<string, string> = {};
+  tableElement
+    .querySelectorAll("tbody > tr")
+    .forEach((tableRowElement) => {
+      const tableDataElements =
+        tableRowElement.querySelectorAll("td");
+
+      if (
+        tableDataElements[0]?.textContent.trim() === "공통"
+      ) {
+        return;
+      }
+
+      const key = tableDataElements[1]?.textContent;
+      const value = tableDataElements[2]?.textContent;
+
+      if (!key || !value) {
+        return;
+      }
+
+      fieldNameMap[key] = value;
+    });
+
+  return fieldNameMap;
+};
+
+const findEPSG = (rawHTML: string) => {
+  const match = rawHTML.match(/EPSG:[0-9]{4,}/)?.[0];
+
+  if (!match) {
+    return;
+  }
+
+  return match;
 };
 
 export const ServiceSearchForm = () => {
@@ -88,11 +137,17 @@ export const ServiceSearchForm = () => {
 
     let serviceName: string;
     let serviceNameKorean: string;
+    let fieldNameMapString: string; // stringify 후 paramString에 붙여서 redirect
+    let epsg: string;
     try {
       serviceName = findServiceName(sampleDataRawHTML);
       serviceNameKorean = findServiceNameKorean(
         targetPageRawHTML
       );
+      fieldNameMapString = encodeURIComponent(
+        JSON.stringify(findFieldNameMap(sampleDataRawHTML))
+      );
+      epsg = findEPSG(targetPageRawHTML) ?? "EPSG:4326";
     } catch (error) {
       if (
         error &&
@@ -121,6 +176,8 @@ export const ServiceSearchForm = () => {
       `/?${new URLSearchParams({
         serviceName,
         serviceNameKorean,
+        fieldNameMapString,
+        epsg,
       })}`
     );
   };

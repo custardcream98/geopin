@@ -1,13 +1,15 @@
 import { getOpenDataSeoulSample } from "@/utils/openData/seoul/seoul.server";
 import { OpenDataGeoFieldSelectForm } from "./OpenDataGeoFieldSelectForm";
 
+import type { MainPageSearchParamsWithServiceName } from "@/app/page";
+
 export const OpenDataSampleViewer = async ({
-  serviceName,
+  searchParams,
 }: {
-  serviceName: string;
+  searchParams: MainPageSearchParamsWithServiceName;
 }) => {
   const data = await getOpenDataSeoulSample({
-    serviceName,
+    serviceName: searchParams.serviceName,
   });
 
   const sampleRow = data.row[0];
@@ -21,7 +23,7 @@ export const OpenDataSampleViewer = async ({
         </pre>
       </details>
       <OpenDataGeoFieldSelectForm
-        serviceName={serviceName}
+        searchParams={searchParams}
         data={sampleRow}
       />
     </div>

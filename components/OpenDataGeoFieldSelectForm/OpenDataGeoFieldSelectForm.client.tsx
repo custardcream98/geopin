@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { redirectToFetchData } from "./OpenDataGeoFieldSelectForm.action";
+import type { MainPageSearchParamsWithServiceName } from "@/app/page";
+import { parseFieldNameMap } from "../_utils/fieldNameMap";
 
 enum SelectingType {
   Type,
@@ -10,27 +12,32 @@ enum SelectingType {
 }
 
 export const OpenDataGeoFieldSelectForm = ({
-  serviceName,
+  searchParams,
   data,
 }: {
-  serviceName: string;
+  searchParams: MainPageSearchParamsWithServiceName;
   data: Record<string, unknown>;
 }) => {
   const [selectingType, setSelectingType] =
     useState<SelectingType>(SelectingType.Type);
 
+  const fieldNameMap = parseFieldNameMap(
+    searchParams.fieldNameMapString
+  );
+
   const options = useMemo(
     () =>
       Object.entries(data).map(([key, value]) => (
         <option key={key} value={key}>
-          '{key}', 샘플 데이터: {JSON.stringify(value)}
+          '{fieldNameMap[key] ?? key}', 샘플 데이터:{" "}
+          {JSON.stringify(value)}
         </option>
       )),
     [data]
   );
 
   const redirectToFetchDataWithSampleData =
-    redirectToFetchData.bind(null, data, serviceName);
+    redirectToFetchData.bind(null, data, searchParams);
 
   return (
     <div>

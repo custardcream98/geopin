@@ -3,16 +3,11 @@
 import { redirect } from "next/navigation";
 import { ErrorId } from "../ErrorMessageToast/ErrorMessageToast.type";
 import type { GeoFieldType } from "@/types/field";
+import type { MainPageSearchParamsWithServiceName } from "@/app/page";
 import { isAddress } from "@/utils/validation/isAddress";
 
 const isString = (value: unknown): value is string =>
   typeof value === "string";
-
-const isValidLongitude = (value: number) =>
-  value >= -180 && value <= 180;
-
-const isValidLatitude = (value: number) =>
-  value >= -90 && value <= 90;
 
 const redirectWithErrorId = (
   serviceName: string,
@@ -68,7 +63,7 @@ function redirectWithValidField(
 
 export const redirectToFetchData = async (
   sampleDataForValidation: Record<string, unknown>,
-  serviceName: string,
+  searchParams: MainPageSearchParamsWithServiceName,
   formData: FormData
 ) => {
   const addressField = formData.get("addressField");
@@ -83,21 +78,27 @@ export const redirectToFetchData = async (
 
     if (!isValidAddress) {
       return redirectWithErrorId(
-        serviceName,
+        searchParams.serviceName,
         ErrorId.InvalidAddressField
       );
     }
 
-    return redirectWithValidField(
-      serviceName,
-      "address",
-      addressField
+    return redirect(
+      `/?${new URLSearchParams({
+        serviceName: searchParams.serviceName,
+        fieldType: "address",
+        addressFieldName: addressField,
+        epsg: searchParams.epsg,
+        fieldNameMapString:
+          searchParams.fieldNameMapString!,
+        serviceNameKorean: searchParams.serviceNameKorean!,
+      })}`
     );
   }
 
   if (longitudeField === latitudeField) {
     return redirectWithErrorId(
-      serviceName,
+      searchParams.serviceName,
       ErrorId.SameCoordinateFieldNames
     );
   }
@@ -113,36 +114,41 @@ export const redirectToFetchData = async (
   const parsedLatitude = Number(sampleLatitude);
 
   const isValidLongitudeField =
-    sampleLongitude && isValidLongitude(parsedLongitude);
+    sampleLongitude && !isNaN(parsedLongitude);
 
   const isValidLatitudeField =
-    sampleLatitude && isValidLatitude(parsedLatitude);
+    sampleLatitude && !isNaN(parsedLatitude);
 
   if (!isValidLongitudeField && !isValidLatitudeField) {
     return redirectWithErrorId(
-      serviceName,
+      searchParams.serviceName,
       ErrorId.InvalidCoordinateFields
     );
   }
 
   if (!isValidLongitudeField) {
     return redirectWithErrorId(
-      serviceName,
+      searchParams.serviceName,
       ErrorId.InvalidLongitudeField
     );
   }
 
   if (!isValidLatitudeField) {
     return redirectWithErrorId(
-      serviceName,
+      searchParams.serviceName,
       ErrorId.InvalidLatitudeField
     );
   }
 
-  return redirectWithValidField(
-    serviceName,
-    "coordinate",
-    longitudeField,
-    latitudeField
+  return redirect(
+    `/?${new URLSearchParams({
+      serviceName: searchParams.serviceName,
+      fieldType: "coordinate",
+      longitudeFieldName: longitudeField,
+      latitudeFieldName: latitudeField,
+      epsg: searchParams.epsg,
+      fieldNameMapString: searchParams.fieldNameMapString!,
+      serviceNameKorean: searchParams.serviceNameKorean!,
+    })}`
   );
 };

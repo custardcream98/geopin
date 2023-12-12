@@ -23,7 +23,15 @@ export type MainPageSearchParams = {
   errorId?: string;
   fieldType?: GeoFieldType;
   dataKeyPick?: string[];
+  fieldNameMapString?: string; // encoded JSON string
+  epsg?: string;
 } & (AddressSearchParams | CoordinateSearchParams);
+
+export type MainPageSearchParamsWithServiceName =
+  MainPageSearchParams &
+    Required<
+      Pick<MainPageSearchParams, "serviceName" | "epsg">
+    >;
 
 export default async function MainPage({
   searchParams,
@@ -45,23 +53,29 @@ export default async function MainPage({
               {searchParams.serviceNameKorean}
             </OpenDataTitleViewer>
           )}
-          {searchParams.serviceName && (
-            <>
-              <OpenDataSampleViewer
-                serviceName={searchParams.serviceName}
-              />
-              {(searchParams.fieldType === "address" ||
-                searchParams.fieldType ===
-                  "coordinate") && (
-                <OpenDataViewer
+          {searchParams.serviceName &&
+            searchParams.epsg && (
+              <>
+                <OpenDataSampleViewer
                   searchParams={{
                     ...searchParams,
+                    epsg: searchParams.epsg,
                     serviceName: searchParams.serviceName,
                   }}
                 />
-              )}
-            </>
-          )}
+                {(searchParams.fieldType === "address" ||
+                  searchParams.fieldType ===
+                    "coordinate") && (
+                  <OpenDataViewer
+                    searchParams={{
+                      ...searchParams,
+                      epsg: searchParams.epsg,
+                      serviceName: searchParams.serviceName,
+                    }}
+                  />
+                )}
+              </>
+            )}
           {searchParams.errorId && (
             <ErrorMessageToast
               errorId={searchParams.errorId}
