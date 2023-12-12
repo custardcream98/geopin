@@ -4,9 +4,13 @@ import { useEffect, useRef, useState } from "react";
 
 import type { ResolvedPOIData } from "@/types/data";
 
+import MarkerImage from "@/assets/marker.png";
+
 const KAKAO_MAP_SCRIPT_URL = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_DEVELOPERS_KEY}&autoload=false`;
 
 const KAKAO_MAP_SCRIPT_ID = "kakao-map-script";
+
+const MARKER_SIZE = 30;
 
 export const KakaoMap = ({
   data,
@@ -65,10 +69,17 @@ export const KakaoMap = ({
     if (!kakaoMap) {
       return;
     }
+    const kakaoMaps = kakao.maps;
+
+    const markerImage = new kakao.maps.MarkerImage(
+      MarkerImage.src,
+      new kakaoMaps.Size(MARKER_SIZE, MARKER_SIZE),
+      kakaoMaps.Point(MARKER_SIZE / 2, MARKER_SIZE)
+    );
 
     const positions = data.map(
       ({ coordinate: { latitude, longitude } }) =>
-        new kakao.maps.LatLng(latitude, longitude)
+        new kakaoMaps.LatLng(latitude, longitude)
     );
 
     markersRef.current.forEach((marker) =>
@@ -76,14 +87,18 @@ export const KakaoMap = ({
     );
     const markers = positions.map(
       (position) =>
-        new kakao.maps.Marker({ map: kakaoMap, position })
+        new kakaoMaps.Marker({
+          map: kakaoMap,
+          position,
+          image: markerImage,
+        })
     );
     markersRef.current = markers;
 
     if (positions.length > 0) {
       const bounds = positions.reduce(
         (bounds, coordinate) => bounds.extend(coordinate),
-        new kakao.maps.LatLngBounds()
+        new kakaoMaps.LatLngBounds()
       );
 
       kakaoMap.setBounds(bounds);
