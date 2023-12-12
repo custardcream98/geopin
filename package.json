@@ -10,6 +10,7 @@
     "@supabase/supabase-js": "latest",
     "autoprefixer": "10.4.15",
     "class-variance-authority": "^0.7.0",
+    "crypto-js": "^4.2.0",
     "epsg-index": "^2.0.0",
     "geist": "^1.0.0",
     "next": "14.0.4",
@@ -21,6 +22,7 @@
     "tailwindcss": "3.3.3"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.1",
     "@types/node": "20.3.1",
     "@types/proj4": "^2.5.5",
     "@types/react": "18.2.8",
