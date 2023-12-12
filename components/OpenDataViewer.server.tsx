@@ -1,6 +1,13 @@
-import type { GeoFieldType } from "@/types/field";
+import { useMemo } from "react";
+
+import { KakaoMap } from "./KakaoMap.client";
+
 import { getOpenDataSeoul } from "@/utils/openData/seoul/seoul.server";
 import { getGeocode } from "@/utils/vworld/geocode.server";
+import { isResolvedPOIData } from "@/utils/validation/isResolvedPOIData";
+
+import type { GeoFieldType } from "@/types/field";
+import type { POIData } from "@/types/data";
 
 const getResolvedData = async ({
   serviceName,
@@ -13,7 +20,7 @@ const getResolvedData = async ({
     latitude: number;
     longitude: number;
   } | null>;
-}) => {
+}): Promise<POIData[]> => {
   const data = (await getOpenDataSeoul({ serviceName }))
     .row;
 
@@ -103,9 +110,7 @@ export const OpenDataViewer = async ({
     coordinateResolver,
   });
 
-  return (
-    <pre className="w-10/12 mx-auto overflow-auto">
-      {JSON.stringify(data, null, 2)}
-    </pre>
-  );
+  const dataWithCoordinate = data.filter(isResolvedPOIData);
+
+  return <KakaoMap data={dataWithCoordinate} />;
 };
