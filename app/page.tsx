@@ -1,10 +1,11 @@
-// import { ServiceSearchForm } from "@/components/ServiceSearchForm.server";
+import { ServiceSearchForm } from "@/components/ServiceSearchForm.server";
 // import AuthButton from "../components/AuthButton";
 import { OpenDataViewer } from "@/components/OpenDataViewer.server";
 import { OpenDataSampleViewer } from "@/components/OpenDataSampleViewer.server";
 import { ErrorMessageToast } from "@/components/ErrorMessageToast";
 import { GeoFieldType } from "@/types/field";
 import { OpenDataTitleViewer } from "@/components/OpenDataTitleViewer.server";
+import Link from "next/link";
 // import { getAuth } from "@/utils/supabase/server";
 
 type AddressSearchParams = {
@@ -44,16 +45,18 @@ export default async function MainPage({
 
   return (
     <div className="flex-1 w-full flex flex-col gap-20 items-center">
-      {/* <nav className="w-full flex justify-center border-b h-16">
+      <nav className="w-full flex justify-center border-b h-16">
         <div className="w-full max-w-4xl flex justify-between items-center p-3 text-sm">
-          <AuthButton />
+          {/* <AuthButton /> */}
+          <Link href="/">홈으로</Link>
         </div>
       </nav>
-      {isLogged ? (
+      {/* {isLogged ? (
         <ServiceSearchForm />
       ) : (
         <div>로그인이 필요합니다.</div>
       )} */}
+      <ServiceSearchForm />
       {
         // isLogged &&
         searchParams && (
