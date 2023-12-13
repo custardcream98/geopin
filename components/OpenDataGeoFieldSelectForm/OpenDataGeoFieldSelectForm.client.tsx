@@ -54,6 +54,9 @@ export const OpenDataGeoFieldSelectForm = ({
             onChange={() =>
               setSelectingType(SelectingType.Address)
             }
+            defaultChecked={
+              searchParams.fieldType === "address"
+            }
           />
           주소 필드 선택하기
         </label>
@@ -65,6 +68,9 @@ export const OpenDataGeoFieldSelectForm = ({
             value="coordinate"
             onChange={() =>
               setSelectingType(SelectingType.Coordinate)
+            }
+            defaultChecked={
+              searchParams.fieldType === "coordinate"
             }
           />
           좌표 필드 선택하기
@@ -82,7 +88,11 @@ export const OpenDataGeoFieldSelectForm = ({
                   name="addressField"
                   id="addressField"
                   className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
-                  defaultValue={Object.keys(data)[0]}
+                  defaultValue={
+                    (searchParams.fieldType === "address" &&
+                      searchParams.addressFieldName) ||
+                    Object.keys(data)[0]
+                  }
                 >
                   {options}
                 </select>
@@ -97,7 +107,12 @@ export const OpenDataGeoFieldSelectForm = ({
                   name="latitudeField"
                   id="latitudeField"
                   className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
-                  defaultValue={Object.keys(data)[0]}
+                  defaultValue={
+                    (searchParams.fieldType ===
+                      "coordinate" &&
+                      searchParams.latitudeFieldName) ||
+                    Object.keys(data)[0]
+                  }
                 >
                   {options}
                 </select>
@@ -108,7 +123,12 @@ export const OpenDataGeoFieldSelectForm = ({
                   name="longitudeField"
                   id="longitudeField"
                   className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
-                  defaultValue={Object.keys(data)[0]}
+                  defaultValue={
+                    (searchParams.fieldType ===
+                      "coordinate" &&
+                      searchParams.longitudeFieldName) ||
+                    Object.keys(data)[0]
+                  }
                 >
                   {options}
                 </select>
