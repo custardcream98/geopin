@@ -11,19 +11,11 @@ export const OpenDataViewer = async ({
   const fieldNameMap: Record<string, string> =
     parseFieldNameMap(searchParams.fieldNameMapString);
 
-  const fieldNameMapReverse = Object.fromEntries(
-    Object.entries(fieldNameMap).map(([key, value]) => [
-      value,
-      key,
-    ])
-  );
-
   return (
     <div className="w-full">
       <DataViewerProvider>
         <DataViewer
           fieldNameMap={fieldNameMap}
-          fieldNameMapReverse={fieldNameMapReverse}
           searchParams={searchParams}
         />
       </DataViewerProvider>

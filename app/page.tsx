@@ -26,7 +26,7 @@ export type MainPageSearchParams = {
   serviceNameKorean?: string;
   errorId?: string;
   fieldType?: GeoFieldType;
-  dataKeyPick?: string[];
+  dataKeyPick?: string[] | string;
   fieldNameMapString?: string; // encoded JSON string
   epsg?: string;
 } & (AddressSearchParams | CoordinateSearchParams);

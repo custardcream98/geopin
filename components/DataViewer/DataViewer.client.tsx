@@ -12,11 +12,9 @@ const PAGE_SIZE = 20;
 export const DataViewer = ({
   searchParams,
   fieldNameMap,
-  fieldNameMapReverse,
 }: {
   searchParams: MainPageSearchParamsWithServiceName;
   fieldNameMap: Record<string, string>;
-  fieldNameMapReverse: Record<string, string>;
 }) => {
   const { data, fetchNextPage, hasNextPage } =
     useInfiniteQuery({
@@ -80,19 +78,7 @@ export const DataViewer = ({
   const allData =
     data?.pages.flatMap((page) => page.data) ?? [];
 
-  const dataWithKoreanFieldName = allData.map((row) => {
-    const newRow: POIData = {
-      coordinate: row.coordinate,
-    };
-
-    Object.entries(row).forEach(([key, value]) => {
-      newRow[fieldNameMap[key] ?? key] = value;
-    });
-
-    return newRow;
-  });
-
-  const dataWithCoordinate = dataWithKoreanFieldName.filter(
+  const dataWithCoordinate = allData.filter(
     isResolvedPOIData
   );
 
@@ -108,24 +94,18 @@ export const DataViewer = ({
             {Object.keys(dataWithCoordinate[0])
               .filter((key) => key !== "coordinate")
               .map((key) => {
-                const originalKey =
-                  fieldNameMapReverse[key] ?? key;
-
                 return (
-                  <label
-                    key={originalKey}
-                    className="block"
-                  >
+                  <label key={key} className="block">
                     <input
                       className="mr-2"
                       type="checkbox"
                       name="data-key-pick"
-                      value={originalKey}
+                      value={key}
                       defaultChecked={searchParams.dataKeyPick?.includes(
-                        originalKey
+                        key
                       )}
                     />
-                    {key}
+                    {fieldNameMap[key] ?? key}
                   </label>
                 );
               })}
@@ -156,9 +136,8 @@ export const DataViewer = ({
         <div className="w-full h-[80vh]">
           <KakaoMap
             data={dataWithCoordinate}
-            dataKeyPick={searchParams.dataKeyPick?.map(
-              (key) => fieldNameMap[key] ?? key
-            )}
+            dataKeyPick={searchParams.dataKeyPick}
+            fieldNameMap={fieldNameMap}
           />
         </div>
       </>

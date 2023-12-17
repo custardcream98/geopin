@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { ResolvedPOIData } from "@/types/data";
+import type { MainPageSearchParams } from "@/app/page";
 
 import MarkerImage from "@/assets/marker.png";
 import { useKakaoMap } from "./_hooks";
@@ -13,34 +14,51 @@ const getOverlayId = (index: number) => `overlay-${index}`;
 const generateOverlayContent = (
   index: number,
   data: ResolvedPOIData,
-  dataKeyPick?: string[]
-) =>
-  !!dataKeyPick?.length &&
-  `
+  fieldNameMap: Record<string, string>,
+  dataKeyPick?: MainPageSearchParams["dataKeyPick"]
+) => {
+  console.log("data", data);
+  console.log("dataKeyPick", dataKeyPick);
+
+  const dataWithPickedKeys = Object.entries(data).filter(
+    ([key]) =>
+      dataKeyPick &&
+      (typeof dataKeyPick === "string"
+        ? dataKeyPick === key
+        : dataKeyPick.includes(key))
+  );
+
+  if (dataWithPickedKeys.length === 0) {
+    return "";
+  }
+
+  return `
   <div class="flex justify-center items-center mb-9 p-2 rounded shadow text-sm bg-white">
     <ul>
-    ${Object.entries(data)
-      .filter(
-        ([key]) => !dataKeyPick || dataKeyPick.includes(key)
-      )
+    ${dataWithPickedKeys
       .map(
         ([key, value]) =>
-          `<li class="w-full">${key}: ${value}</li>`
+          `<li class="w-full">${
+            fieldNameMap[key] ?? key
+          }: ${value}</li>`
       )
       .join("")}
     </ul>
     <button id="${getOverlayId(
       index
-    )}" type="button" class="float-right font-bold">닫기</button>
+    )}" type="button" class="float-right ml-2 font-bold">닫기</button>
   </div>
 `;
+};
 
 export const KakaoMap = ({
   data,
   dataKeyPick,
+  fieldNameMap,
 }: {
   data: ResolvedPOIData[];
-  dataKeyPick?: string[];
+  dataKeyPick?: MainPageSearchParams["dataKeyPick"];
+  fieldNameMap: Record<string, string>;
 }) => {
   const mapContainerElementRef =
     useRef<HTMLDivElement>(null);
@@ -91,6 +109,7 @@ export const KakaoMap = ({
         content: generateOverlayContent(
           index,
           data[index],
+          fieldNameMap,
           dataKeyPick
         ),
         yAnchor: 1,
