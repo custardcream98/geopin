@@ -17,9 +17,6 @@ const generateOverlayContent = (
   fieldNameMap: Record<string, string>,
   dataKeyPick?: MainPageSearchParams["dataKeyPick"]
 ) => {
-  console.log("data", data);
-  console.log("dataKeyPick", dataKeyPick);
-
   const dataWithPickedKeys = Object.entries(data).filter(
     ([key]) =>
       dataKeyPick &&
