@@ -11,7 +11,9 @@ const isString = (value: unknown): value is string =>
   typeof value === "string";
 
 const redirectWithErrorId = (
-  searchParams: MainPageSearchParamsWithServiceName,
+  searchParams: Partial<MainPageSearchParamsWithServiceName> & {
+    serviceName: string;
+  },
   errorId: ErrorId
 ) =>
   redirect(
@@ -23,7 +25,9 @@ const redirectWithErrorId = (
 
 export const redirectToFetchData = async (
   sampleDataForValidation: Record<string, unknown>,
-  searchParams: MainPageSearchParamsWithServiceName,
+  searchParams: Partial<MainPageSearchParamsWithServiceName> & {
+    serviceName: string;
+  },
   formData: FormData
 ) => {
   const addressField = formData.get("addressField");

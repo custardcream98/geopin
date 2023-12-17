@@ -15,7 +15,9 @@ export const OpenDataGeoFieldSelectForm = ({
   searchParams,
   data,
 }: {
-  searchParams: MainPageSearchParamsWithServiceName;
+  searchParams: Partial<MainPageSearchParamsWithServiceName> & {
+    serviceName: string;
+  };
   data: Record<string, unknown>;
 }) => {
   const [selectingType, setSelectingType] =
