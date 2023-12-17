@@ -24,6 +24,7 @@ export const TableViewer = ({
       <table>
         <thead>
           <tr>
+            <th className="whitespace-nowrap px-3 py-2"></th>
             {headers.map((header) => (
               <th
                 key={header}
@@ -57,6 +58,9 @@ export const TableViewer = ({
                   setSelectedPoint(key);
                 }}
               >
+                <td className="px-2 py-1 text-center whitespace-nowrap">
+                  {index + 1}
+                </td>
                 {headers.map((header) => (
                   <td
                     key={header}
