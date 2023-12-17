@@ -21,6 +21,7 @@ type CoordinateSearchParams = {
 };
 
 export type MainPageSearchParams = {
+  targetUrl?: string;
   serviceName?: string;
   serviceNameKorean?: string;
   errorId?: string;
@@ -57,7 +58,7 @@ export default async function MainPage({
       ) : (
         <div>로그인이 필요합니다.</div>
       )} */}
-      <ServiceSearchForm />
+      <ServiceSearchForm searchParams={searchParams} />
       {
         // isLogged &&
         searchParams && (

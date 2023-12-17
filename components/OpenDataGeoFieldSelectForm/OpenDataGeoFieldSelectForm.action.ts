@@ -1,65 +1,25 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { ErrorId } from "../ErrorMessageToast/ErrorMessageToast.type";
-import type { GeoFieldType } from "@/types/field";
-import type { MainPageSearchParamsWithServiceName } from "@/app/page";
 import { isAddress } from "@/utils/validation/isAddress";
+import { omit } from "@/utils/object";
+
+import { ErrorId } from "../ErrorMessageToast/ErrorMessageToast.type";
+import type { MainPageSearchParamsWithServiceName } from "@/app/page";
 
 const isString = (value: unknown): value is string =>
   typeof value === "string";
 
 const redirectWithErrorId = (
-  serviceName: string,
+  searchParams: MainPageSearchParamsWithServiceName,
   errorId: ErrorId
 ) =>
   redirect(
     `/?${new URLSearchParams({
-      serviceName,
+      ...omit(searchParams, ["dataKeyPick"]),
       errorId: errorId.toString(),
     })}`
   );
-
-function redirectWithValidField(
-  serviceName: string,
-  fieldType: "address",
-  addressFieldName: string
-): void;
-function redirectWithValidField(
-  serviceName: string,
-  fieldType: "coordinate",
-  longitudeFieldName: string,
-  latitudeFieldName: string
-): void;
-function redirectWithValidField(
-  serviceName: string,
-  fieldType: GeoFieldType,
-  ...fieldNames: string[]
-) {
-  if (fieldType === "address") {
-    const [addressFieldName] = fieldNames;
-
-    return redirect(
-      `/?${new URLSearchParams({
-        serviceName,
-        fieldType,
-        addressFieldName,
-      })}`
-    );
-  } else {
-    const [longitudeFieldName, latitudeFieldName] =
-      fieldNames;
-
-    return redirect(
-      `/?${new URLSearchParams({
-        serviceName,
-        fieldType,
-        longitudeFieldName,
-        latitudeFieldName,
-      })}`
-    );
-  }
-}
 
 export const redirectToFetchData = async (
   sampleDataForValidation: Record<string, unknown>,
@@ -78,27 +38,23 @@ export const redirectToFetchData = async (
 
     if (!isValidAddress) {
       return redirectWithErrorId(
-        searchParams.serviceName,
+        searchParams,
         ErrorId.InvalidAddressField
       );
     }
 
     return redirect(
       `/?${new URLSearchParams({
-        serviceName: searchParams.serviceName,
+        ...omit(searchParams, ["dataKeyPick"]),
         fieldType: "address",
         addressFieldName: addressField,
-        epsg: searchParams.epsg,
-        fieldNameMapString:
-          searchParams.fieldNameMapString!,
-        serviceNameKorean: searchParams.serviceNameKorean!,
       })}`
     );
   }
 
   if (longitudeField === latitudeField) {
     return redirectWithErrorId(
-      searchParams.serviceName,
+      searchParams,
       ErrorId.SameCoordinateFieldNames
     );
   }
@@ -121,34 +77,31 @@ export const redirectToFetchData = async (
 
   if (!isValidLongitudeField && !isValidLatitudeField) {
     return redirectWithErrorId(
-      searchParams.serviceName,
+      searchParams,
       ErrorId.InvalidCoordinateFields
     );
   }
 
   if (!isValidLongitudeField) {
     return redirectWithErrorId(
-      searchParams.serviceName,
+      searchParams,
       ErrorId.InvalidLongitudeField
     );
   }
 
   if (!isValidLatitudeField) {
     return redirectWithErrorId(
-      searchParams.serviceName,
+      searchParams,
       ErrorId.InvalidLatitudeField
     );
   }
 
   return redirect(
     `/?${new URLSearchParams({
-      serviceName: searchParams.serviceName,
+      ...omit(searchParams, ["dataKeyPick"]),
       fieldType: "coordinate",
       longitudeFieldName: longitudeField,
       latitudeFieldName: latitudeField,
-      epsg: searchParams.epsg,
-      fieldNameMapString: searchParams.fieldNameMapString!,
-      serviceNameKorean: searchParams.serviceNameKorean!,
     })}`
   );
 };

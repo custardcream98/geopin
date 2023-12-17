@@ -4,6 +4,7 @@ import { parse } from "node-html-parser";
 import { ErrorId } from "./ErrorMessageToast/ErrorMessageToast.type";
 import { stringifyFieldNameMap } from "./_utils/fieldNameMap";
 import { encode } from "@/utils/crypto";
+import type { MainPageSearchParams } from "@/app/page";
 
 const getSampleDataResponse = async (
   informationId: string
@@ -108,11 +109,16 @@ const findEPSG = (rawHTML: string) => {
   return match;
 };
 
-export const ServiceSearchForm = () => {
+export const ServiceSearchForm = ({
+  searchParams,
+}: {
+  searchParams?: MainPageSearchParams;
+}) => {
   const getSeoulOpenData = async (formData: FormData) => {
     "use server";
 
     const url = formData.get("target-url") as string;
+    const encodedUrl = encodeURIComponent(url);
 
     const segments = url.split("/");
     const informationId =
@@ -127,6 +133,7 @@ export const ServiceSearchForm = () => {
     if (!sampleDataResponse.ok || !targetPageResponse.ok) {
       return redirect(
         `/?${new URLSearchParams({
+          targetUrl: encodedUrl,
           errorId:
             ErrorId.FailedToFetchOpenDataSeoulSample.toString(),
         })}`
@@ -170,6 +177,7 @@ export const ServiceSearchForm = () => {
 
       return redirect(
         `/?${new URLSearchParams({
+          targetUrl: encodedUrl,
           errorId: "999",
         })}`
       );
@@ -177,6 +185,7 @@ export const ServiceSearchForm = () => {
 
     return redirect(
       `/?${new URLSearchParams({
+        targetUrl: encodedUrl,
         serviceName,
         serviceNameKorean,
         fieldNameMapString,
@@ -198,11 +207,14 @@ export const ServiceSearchForm = () => {
           type="text"
           id="target-url"
           name="target-url"
-          required
-          // pattern="(?:http[s]{0,1}\:\/\/)data\.seoul\.go\.kr\/dataList\/[0-9A-Za-z\/]{4,}"
-          // className="invalid:bg-red-200 bg-green-200"
+          defaultValue={
+            searchParams?.targetUrl
+              ? decodeURIComponent(searchParams.targetUrl)
+              : undefined
+          }
           autoSave="off"
           className="mx-2 p-2 border rounded block w-full mt-2"
+          required
         />
         <button
           type="submit"
