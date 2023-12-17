@@ -145,7 +145,7 @@ export const KakaoMap = ({
    * */
 
   useEffect(() => {
-    overlaysState.map((overlay, index) => {
+    overlaysState.forEach((overlay, index) => {
       document
         .getElementById(getOverlayId(index))
         ?.addEventListener("click", () =>
