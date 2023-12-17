@@ -154,6 +154,24 @@ export const KakaoMap = ({
     });
   }, [overlaysState]);
 
+  useEffect(() => {
+    if (!kakaoMap) {
+      return;
+    }
+
+    document.addEventListener("map:move", (event) => {
+      const kakaoMaps = kakao.maps;
+      const position = new kakaoMaps.LatLng(
+        // @ts-ignore
+        event.detail.latitude,
+        // @ts-ignore
+        event.detail.longitude
+      );
+
+      kakaoMap.panTo(position);
+    });
+  }, [kakaoMap]);
+
   return (
     <div
       ref={mapContainerElementRef}
